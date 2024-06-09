@@ -5,6 +5,7 @@ using System.Text;
 using rrhh_api.Models;
 using rrhh_api.Dto;
 using System.Security.Cryptography;
+using BCrypt.Net;
 
 namespace rrhh_api.Services
 {
@@ -52,11 +53,11 @@ namespace rrhh_api.Services
         public async Task<AuthResponse> AuthResponse(LoginDto login)
         {
             var userFound = _context.Usuarios.FirstOrDefault(x =>
-                x.CodUsuario == login.User &&
-                x.Password == login.Password
+                x.CodUsuario == login.User //&&
+                //x.Password == login.Password
             );
 
-            if (userFound == null)
+            if (userFound == null || !BCrypt.Net.BCrypt.Verify(login.Password, userFound.Password))
             {
                 return await Task.FromResult<AuthResponse>(null);
             }
@@ -116,6 +117,33 @@ namespace rrhh_api.Services
             var tokenCreado = GenerateToken(user);
 
             return await SaveTokens(user, tokenCreado, refreshTokenCreado);
+        }
+
+        public async Task<AuthResponse> RegisterUser(RegisterDto register)
+        {
+            var existingUser = _context.Usuarios.FirstOrDefault(x => x.CodUsuario == register.User);
+
+            if (existingUser != null)
+            {
+                return new AuthResponse { result = false, message = "Usuario ya registrado" };
+            }
+
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(register.Password);
+
+            var newUser = new Usuario
+            {
+                CodUsuario = register.User,
+                Password = hashedPassword,
+                // Agrega otros campos necesarios
+            };
+
+            await _context.Usuarios.AddAsync(newUser);
+            await _context.SaveChangesAsync();
+
+            string token = GenerateToken(newUser.CodUsuario.ToString());
+            string refreshToken = GenerateRefreshToken();
+
+            return await SaveTokens(newUser.CodUsuario, token, refreshToken);
         }
     }
 }

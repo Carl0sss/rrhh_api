@@ -6,5 +6,6 @@ namespace rrhh_api.Services
     {
         Task<AuthResponse> AuthResponse(LoginDto login);
         Task<AuthResponse> RefreshTokenResponse(TokenDto refreshToken, string user);
+        Task<AuthResponse> RegisterUser(RegisterDto register);
     }
 }

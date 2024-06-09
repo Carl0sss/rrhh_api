@@ -49,5 +49,18 @@ namespace rrhh_api.Controllers
                 return BadRequest(autorizacionResponse);
         }
 
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterDto register)
+        {
+            var registerResult = await _authService.RegisterUser(register);
+
+            if (!registerResult.result)
+            {
+                return BadRequest(registerResult);
+            }
+
+            return Ok(registerResult);
+        }
+
     }
 }
