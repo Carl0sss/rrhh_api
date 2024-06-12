@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using rrhh_api.Models;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace rrhh_api.Controllers
 {
@@ -22,9 +19,36 @@ namespace rrhh_api.Controllers
 
         // GET: api/Empleado
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Empleado>>> GetEmpleados()
+        public async Task<ActionResult<IEnumerable<object>>> GetEmpleados()
         {
-            return await _context.Empleados.ToListAsync();
+            var empleados = await _context.Empleados
+                .Select(e => new
+                {
+                    e.CodEmpleado,
+                    e.Apellidos,
+                    e.Nombres,
+                    e.Sexo,
+                    e.Dui,
+                    e.Afp,
+                    e.Isss,
+                    e.NombreAfp,
+                    e.FechaNacimiento,
+                    e.Telefono,
+                    e.Email,
+                    e.EstadoCivil,
+                    e.Domicilio,
+                    e.FechaIngreso,
+                    e.Salario,
+                    e.NumeroContrato,
+                    e.CodGrupo,
+                    e.CodDepartamento,
+                    e.CodDepartamentoNavigation.NombreDepartamento,
+                    e.CodPuesto,
+                    e.CodPuestoNavigation.NombrePuesto,
+                })
+                .ToListAsync();
+
+            return empleados;
         }
 
         // GET: api/Empleado/5

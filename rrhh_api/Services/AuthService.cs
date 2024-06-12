@@ -134,7 +134,7 @@ namespace rrhh_api.Services
             {
                 CodUsuario = register.User,
                 Password = hashedPassword,
-                // Agrega otros campos necesarios
+                FechaCreacion = DateTime.Now,
             };
 
             await _context.Usuarios.AddAsync(newUser);
